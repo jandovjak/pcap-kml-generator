@@ -22,6 +22,10 @@ class IP:
                 self.country = response.country.name
                 self.city = response.city.name
                 self.position = Position(response.location.longitude, response.location.latitude)
+                if response.location.longitude is None:
+                    self.country = 'N/A'
+                    self.city = 'N/A'
+                    self.position = Position(0, 0)
             except:
                 if position is None:
                     self.country = 'N/A'
