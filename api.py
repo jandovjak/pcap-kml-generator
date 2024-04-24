@@ -8,8 +8,12 @@ import os
 
 app = FastAPI()
 
+
 @app.post("/generate")
-async def generate(file: UploadFile, output_filename: Annotated[str, Form()], home_longtitude: Annotated[float, Form()], home_latitude: Annotated[float, Form()]):
+async def generate(file: UploadFile,
+                   output_filename: Annotated[str, Form()],
+                   home_longtitude: Annotated[float, Form()],
+                   home_latitude: Annotated[float, Form()]):
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         temp_file.write(await file.read())
         temp_file_name = temp_file.name
@@ -20,4 +24,6 @@ async def generate(file: UploadFile, output_filename: Annotated[str, Form()], ho
     headers = {
         'Content-Disposition': f'attachment; filename="{output_filename}"'
     }
-    return StreamingResponse(byte_stream, media_type="text/plain", headers=headers)
+    return StreamingResponse(byte_stream,
+                             media_type="text/plain",
+                             headers=headers)

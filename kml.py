@@ -8,10 +8,12 @@ import sys
 HEADER = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.3">\n<Document>\n'
 FOOTER = '</Document>\n</kml>\n'
 
+
 class Position:
     def __init__(self, longtitude, latitude):
         self.longtitude = longtitude
         self.latitude = latitude
+
 
 class IP:
     def __init__(self, address, position=None):
@@ -21,7 +23,8 @@ class IP:
                 response = reader.city(address)
                 self.country = response.country.name
                 self.city = response.city.name
-                self.position = Position(response.location.longitude, response.location.latitude)
+                self.position = Position(response.location.longitude,
+                                         response.location.latitude)
                 if response.location.longitude is None:
                     self.country = 'N/A'
                     self.city = 'N/A'
@@ -35,11 +38,12 @@ class IP:
                     self.country = 'Home'
                     self.city = 'Home'
                     self.position = position
-    
+
     def __eq__(self, other):
         if not isinstance(other, IP):
             return False
         return self.address == other.address 
+
 
 class Route:
     def __init__(self, source, destination):
@@ -66,16 +70,19 @@ class Route:
 </Placemark>\n\
 "
 
+
 def create_route(ethernet):
     ip = ethernet.data
     source = IP(socket.inet_ntoa(ip.src))
     destination = IP(socket.inet_ntoa(ip.dst))
     return Route(source, destination)
 
+
 def create_route(source_ip, source_position, destination_ip):
     source = IP(source_ip, source_position)
     destination = IP(destination_ip)
     return Route(source, destination)
+
 
 def all_routes_from_pcap(file):
     routes = []
@@ -87,6 +94,7 @@ def all_routes_from_pcap(file):
             if isinstance(ethernet.data, dpkt.ip.IP):
                 routes.append(create_route(ethernet))
     return routes
+
 
 def filter_ip_addresses(file):
     ip_addresses = {}
@@ -103,15 +111,18 @@ def filter_ip_addresses(file):
                 ip_addresses[destination] = ip_addresses.get(destination, 0) + 1
     return ip_addresses
 
+
 def create_routes(ip_addresses, home_position):
     routes = []
-    sorted_ip_addresses = sorted(ip_addresses.items(), key=lambda item: item[1], reverse=True)
+    sorted_ip_addresses = sorted(ip_addresses.items(),
+                                 key=lambda item: item[1], reverse=True)
     ip_addresses = dict(sorted_ip_addresses)
     home_address, _ = sorted_ip_addresses[0]
     ip_addresses.pop(home_address)
     for ip_address in ip_addresses:
         routes.append(create_route(home_address, home_position, ip_address))
     return routes
+
 
 def generate_kml(input_file, home_longtitude, home_latitude):
     home_position = Position(home_longtitude, home_latitude)
@@ -123,6 +134,7 @@ def generate_kml(input_file, home_longtitude, home_latitude):
     content += FOOTER
     return content
 
+
 def main():
     if len(sys.argv) < 2:
         print("No input file provided")
@@ -130,7 +142,7 @@ def main():
     input_file = sys.argv[1]
     output_file = 'output.kml'
     if len(sys.argv) > 2:
-       output_file = sys.argv[2]
+        output_file = sys.argv[2]
     home_longtitude = 16
     home_latitude = 49
     content = generate_kml(input_file, home_longtitude, home_latitude)
