@@ -13,15 +13,16 @@ app = FastAPI()
 async def generate(file: UploadFile,
                    output_filename: Annotated[str, Form()],
                    home_longtitude: Annotated[float, Form()],
-                   home_latitude: Annotated[float, Form()]):
+                   home_latitude: Annotated[float, Form()])\
+                    -> StreamingResponse:
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         temp_file.write(await file.read())
-        temp_file_name = temp_file.name
-    content = generate_kml(temp_file_name, home_longtitude, home_latitude)
+        temp_file_name: str = temp_file.name
+    content: str = generate_kml(temp_file_name, home_longtitude, home_latitude)
     os.remove(temp_file_name)
-    byte_string = content.encode("utf-8")
-    byte_stream = BytesIO(byte_string)
-    headers = {
+    byte_string: bytes = content.encode("utf-8")
+    byte_stream: BytesIO = BytesIO(byte_string)
+    headers: dict[str, str] = {
         'Content-Disposition': f'attachment; filename="{output_filename}"'
     }
     return StreamingResponse(byte_stream,
